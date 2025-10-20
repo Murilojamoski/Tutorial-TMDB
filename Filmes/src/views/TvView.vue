@@ -2,20 +2,17 @@
   import { ref, onMounted } from 'vue';
   import api from '@/plugins/axios';
   import Loading from 'vue-loading-overlay';
+  import { useGenreStore } from '@/stores/genre';
 
+  const genreStore = useGenreStore();
   const isLoading = ref(false);
-  const genres = ref([]);
   const formatDate = (date) => date ? new Date(date).toLocaleDateString('pt-BR') : '';
   const tvs = ref([]);
 
-  function getGenreName(id) {
-    const genero = genres.value.find((g) => g.id === id);
-    return genero ? genero.name : '';
-  }
-
   onMounted(async () => {
-    const response = await api.get('genre/tv/list?language=pt-BR');
-    genres.value = response.data.genres;
+    isLoading.value = true;
+    await genreStore.getAllGenres('tv');
+    isLoading.value = false;
   });
 
   const listTv = async (genreId) => {
@@ -38,7 +35,7 @@
   <h1>Programas de TV</h1>
   <ul class="genre-list">
     <li
-      v-for="genre in genres"
+      v-for="genre in genreStore.genres"
       :key="genre.id"
       class="genre-item"
       @click="listTv(genre.id)"
@@ -64,7 +61,7 @@
             :key="genre_id"
             @click="listTv(genre_id)"
           >
-            {{ getGenreName(genre_id) }}
+            {{ genreStore.getGenreName(genre_id) }}
           </span>
         </p>
       </div>
