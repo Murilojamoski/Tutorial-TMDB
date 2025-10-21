@@ -1,9 +1,11 @@
 <script setup>
   import { ref, onMounted } from 'vue';
+  import { useRouter } from 'vue-router';
   import api from '@/plugins/axios';
   import Loading from 'vue-loading-overlay';
   import { useGenreStore } from '@/stores/genre';
 
+  const router = useRouter();
   const genreStore = useGenreStore();
   const isLoading = ref(false);
   const formatDate = (date) => date ? new Date(date).toLocaleDateString('pt-BR') : '';
@@ -29,6 +31,10 @@
       isLoading.value = false;
     }
   };
+
+  function openTv(tvId) {
+    router.push({ name: 'TvDetails', params: { tvId } });
+  }
 </script>
 
 <template>
@@ -51,7 +57,9 @@
       <img
         :src="`https://image.tmdb.org/t/p/w500${tv.poster_path}`"
         :alt="tv.name"
+        @click="openTv(tv.id)"
       />
+
       <div class="tv-details">
         <p class="tv-title">{{ tv.name }}</p>
         <p class="tv-release-date">{{ formatDate(tv.first_air_date) }}</p>
@@ -59,7 +67,7 @@
           <span
             v-for="genre_id in tv.genre_ids"
             :key="genre_id"
-            @click="listTv(genre_id)"
+            @click.stop="listTv(genre_id)"
           >
             {{ genreStore.getGenreName(genre_id) }}
           </span>
